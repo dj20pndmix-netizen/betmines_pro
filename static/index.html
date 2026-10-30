@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚽ BetMines Pro - AI Best Prediction Engine & 100% Sync</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BetMines Pro">
+  <link rel="icon" type="image/svg+xml" href="/static/ball.svg">
+  <link rel="alternate icon" href="/static/favicon.png">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .bg-dark-card { background: #161b22; }
+    .glow-gold { box-shadow: 0 0 15px rgba(245, 158, 11, 0.25); }
+    .glow-green { box-shadow: 0 0 15px rgba(16, 185, 129, 0.25); }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="border-b border-gray-800 bg-gray-900 sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Logo & Branding -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showLiveView()">
+        <div class="w-10 h-10 rounded-xl bg-gray-800 border border-gray-700 flex items-center justify-center shadow-lg p-1 hover:border-emerald-500 transition">
+          <img src="/static/ball.svg" alt="Football" class="w-8 h-8 object-contain">
+        </div>
+        <div>
+          <h1 class="text-xl font-black tracking-tight bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 bg-clip-text text-transparent flex items-center gap-1.5">
+            BETMINES PRO
+          </h1>
+          <p class="text-xs text-gray-400 font-medium">100% Synced AI Prediction & History Engine</p>
+        </div>
+      </div>
+
+      <!-- Navigation & Day Switcher -->
+      <div class="flex items-center flex-wrap gap-2.5">
+        
+        <!-- View Toggle (Live Predictions vs History) -->
+        <div class="bg-gray-800 p-1 rounded-xl flex items-center border border-gray-700 text-xs font-semibold">
+          <button onclick="showLiveView()" id="view-live" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition flex items-center gap-1.5">
+            <i data-lucide="radio" class="w-3.5 h-3.5"></i> Live Matches
+          </button>
+          <button onclick="showHistoryView()" id="view-history" class="px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition flex items-center gap-1.5">
+            <i data-lucide="history" class="w-3.5 h-3.5"></i> Results & History
+          </button>
+        </div>
+
+        <!-- Day Switcher (Visible on Live Matches) -->
+        <div id="day-switcher" class="bg-gray-800 p-1 rounded-xl flex items-center border border-gray-700 text-xs font-semibold">
+          <button onclick="setDay('yesterday')" id="day-yesterday" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">Yesterday</button>
+          <button onclick="setDay('today')" id="day-today" class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition">Today</button>
+          <button onclick="setDay('tomorrow')" id="day-tomorrow" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition">Tomorrow</button>
+        </div>
+
+        <!-- Live Sync Pill -->
+        <div id="sync-pill" class="flex items-center space-x-2 bg-gray-800/80 border border-gray-700 px-3 py-1.5 rounded-xl text-xs">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="sync-text" class="text-gray-300">Checking sync...</span>
+        </div>
+
+        <!-- Sync Button -->
+        <button onclick="triggerSync()" id="sync-btn" class="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-4 py-1.5 rounded-xl font-semibold text-xs text-white shadow-md transition transform active:scale-95">
+          <i data-lucide="refresh-cw" id="sync-icon" class="w-3.5 h-3.5"></i>
+          <span>Sync BetMines</span>
+        </button>
+
+        <!-- PWA Install Button for Android / Mobile / Desktop -->
+        <button id="pwa-install-btn" class="hidden flex items-center space-x-1.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-gray-950 px-3.5 py-1.5 rounded-xl font-black text-xs shadow-md transition transform active:scale-95">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i>
+          <span>Install App</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+    <!-- ================= LIVE PREDICTIONS VIEW ================= -->
+    <div id="live-section" class="space-y-6">
+
+      <!-- Hero Golden Picks Showcase -->
+      <section class="bg-gradient-to-r from-gray-900 via-gray-900 to-gray-850 border border-gray-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div>
+            <span class="text-xs uppercase tracking-wider font-bold text-amber-400 flex items-center gap-1.5">
+              <i data-lucide="award" class="w-4 h-4"></i> AI Daily Golden Selections
+            </span>
+            <h2 class="text-xl font-black text-white mt-1">High-Confidence 1X2 & Value Opportunities</h2>
+          </div>
+
+          <!-- Golden Category Tabs -->
+          <div class="flex flex-wrap gap-2 text-xs font-semibold">
+            <button onclick="switchGolden('winners_1x2')" id="gtab-winners_1x2" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40">
+              🏆 1X2 Winners
+            </button>
+            <button onclick="switchGolden('bankers')" id="gtab-bankers" class="px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+              🛡️ Safe Bankers (80%+)
+            </button>
+            <button onclick="switchGolden('values')" id="gtab-values" class="px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+              💎 Value Bets (EV+)
+            </button>
+            <button onclick="switchGolden('btts')" id="gtab-btts" class="px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+              ⚽ BTTS Selections
+            </button>
+            <button onclick="switchGolden('goals')" id="gtab-goals" class="px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
+              🔥 Goal Machines
+            </button>
+          </div>
+        </div>
+
+        <!-- Golden Cards Grid -->
+        <div id="golden-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+      </section>
+
+      <!-- Accumulator Generator & Filter Toolbar -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Left Sidebar: Filter & Slip Builder -->
+        <div class="lg:col-span-1 space-y-4">
+          
+          <!-- Smart Accumulator Generator -->
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+              <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i> Smart Accumulator Builder
+            </h3>
+            <div class="space-y-3 text-xs">
+              <div>
+                <label class="block text-gray-400 mb-1">Strategy Mode</label>
+                <select id="slip-mode" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-gray-200 font-medium">
+                  <option value="bankers">🛡️ Safe Bankers (High Prob)</option>
+                  <option value="balanced">⚖️ Balanced 1X2 & Goals (Prob 70% + Odds 1.35+)</option>
+                  <option value="high_value">💎 Value Bets Only (Positive Edge)</option>
+                  <option value="btts_only">⚽ Both Teams to Score Combo</option>
+                  <option value="over25_only">🔥 Over 2.5 Goals Combo</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-gray-400 mb-1">Number of Legs</label>
+                <div class="grid grid-cols-4 gap-1.5 font-semibold">
+                  <button type="button" onclick="setLegs(3)" class="slip-leg-btn py-1.5 rounded-lg bg-gray-800 border border-gray-700 hover:bg-emerald-600/30" data-leg="3">3</button>
+                  <button type="button" onclick="setLegs(5)" class="slip-leg-btn py-1.5 rounded-lg bg-emerald-600 text-white font-bold" data-leg="5">5</button>
+                  <button type="button" onclick="setLegs(7)" class="slip-leg-btn py-1.5 rounded-lg bg-gray-800 border border-gray-700 hover:bg-emerald-600/30" data-leg="7">7</button>
+                  <button type="button" onclick="setLegs(10)" class="slip-leg-btn py-1.5 rounded-lg bg-gray-800 border border-gray-700 hover:bg-emerald-600/30" data-leg="10">10</button>
+                </div>
+              </div>
+              <button onclick="generateSlip()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 shadow">
+                <i data-lucide="layers" class="w-4 h-4"></i> Generate Slip
+              </button>
+            </div>
+
+            <!-- Slip Preview Area -->
+            <div id="slip-result" class="mt-4 pt-3 border-t border-gray-800 hidden">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-xs text-gray-400">Total Odds:</span>
+                <span id="slip-total-odds" class="text-sm font-black text-amber-400 font-mono">1.00</span>
+              </div>
+              <div class="flex justify-between items-center mb-3">
+                <span class="text-xs text-gray-400">Est. Win Rate:</span>
+                <span id="slip-win-rate" class="text-xs font-bold text-emerald-400">0%</span>
+              </div>
+              <div id="slip-items" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+          </div>
+
+          <!-- Filters Box -->
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg space-y-3.5 text-xs">
+            <h3 class="text-sm font-bold text-white flex items-center justify-between">
+              <span class="flex items-center gap-2"><i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i> Market Filters</span>
+              <button onclick="resetFilters()" class="text-gray-400 hover:text-amber-400 font-semibold">Reset</button>
+            </h3>
+
+            <div>
+              <label class="block text-gray-400 mb-1">Target Market</label>
+              <select id="market-filter" onchange="applyFilters()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-gray-200 font-medium">
+                <option value="all">🌐 All 40+ Markets</option>
+                <option value="1X2">🏆 Match Winner (1X2 Only)</option>
+                <option value="Double Chance">🛡️ Double Chance (1X, 12, X2)</option>
+                <option value="Goals">⚽ Goals Over/Under (FT)</option>
+                <option value="1st Half Goals">⏱️ 1st Half Goals (O/U 0.5, 1.5)</option>
+                <option value="2nd Half Goals">⏱️ 2nd Half Goals (O/U 0.5, 1.5)</option>
+                <option value="BTTS">🔥 Both Teams To Score (BTTS)</option>
+                <option value="1st Half 1X2">⚡ 1st Half 1X2</option>
+                <option value="Corners">🚩 Corners Over/Under</option>
+                <option value="HT/FT">🔄 HT 1 - FT 1 / HT 2 - FT 2</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-gray-400 mb-1">
+                <span>Min Probability:</span>
+                <span id="prob-val" class="font-bold text-emerald-400">0%</span>
+              </div>
+              <input type="range" id="min-prob" min="0" max="95" step="5" value="0" oninput="updateProbLabel(this.value)" onchange="applyFilters()" class="w-full accent-emerald-500">
+            </div>
+
+            <div>
+              <label class="block text-gray-400 mb-1">Min Odds (Decimal)</label>
+              <input type="number" id="min-odds" min="1.0" max="15.0" step="0.05" placeholder="e.g. 1.40" onchange="applyFilters()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-gray-200">
+            </div>
+
+            <div class="flex items-center justify-between pt-1">
+              <span class="text-gray-300 font-medium">Value Bets Only (EV > 0)</span>
+              <input type="checkbox" id="value-only" onchange="applyFilters()" class="w-4 h-4 accent-emerald-500 rounded">
+            </div>
+
+            <div class="pt-2">
+              <button onclick="exportCSV()" class="w-full border border-gray-700 hover:border-gray-500 text-gray-300 py-2 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Predictions (CSV)
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Area: Fixture Grid & Search -->
+        <div class="lg:col-span-3 space-y-4">
+          
+          <!-- Search Bar -->
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-3 px-4 flex flex-wrap items-center justify-between gap-3 shadow-md">
+            <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
+              <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
+              <input type="text" id="search-input" onkeyup="handleSearch(event)" placeholder="Search team or league (e.g. Arsenal, Real Madrid, Premier League)..." class="bg-transparent border-none text-xs text-gray-200 focus:outline-none w-full">
+            </div>
+            <div class="text-xs text-gray-400 font-medium flex items-center gap-3">
+              <span>Showing: <strong id="match-count" class="text-emerald-400">0</strong> matches</span>
+            </div>
+          </div>
+
+          <!-- Fixtures Container -->
+          <div id="fixtures-container" class="space-y-3"></div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= PREDICTION HISTORY & RESULTS VIEW ================= -->
+    <div id="history-section" class="space-y-6 hidden">
+      
+      <!-- History Performance Header Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+          <div>
+            <span class="text-xs text-gray-400 uppercase font-semibold">1X2 Accuracy Rate</span>
+            <div id="hist-1x2-rate" class="text-2xl font-black text-amber-400 mt-1">0%</div>
+            <span id="hist-1x2-sub" class="text-[11px] text-gray-500">0 of 0 won</span>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <i data-lucide="trophy" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+          <div>
+            <span class="text-xs text-gray-400 uppercase font-semibold">Overall Top Pick Win Rate</span>
+            <div id="hist-top-rate" class="text-2xl font-black text-emerald-400 mt-1">0%</div>
+            <span id="hist-top-sub" class="text-[11px] text-gray-500">0 of 0 won</span>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <i data-lucide="check-circle" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+          <div>
+            <span class="text-xs text-gray-400 uppercase font-semibold">Net Profit / Units</span>
+            <div id="hist-profit-units" class="text-2xl font-black text-teal-400 mt-1">+0.00 u</div>
+            <span class="text-[11px] text-gray-500">1 unit flat stake ROI</span>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+            <i data-lucide="trending-up" class="w-6 h-6"></i>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+          <div>
+            <span class="text-xs text-gray-400 uppercase font-semibold">Completed Matches Tracked</span>
+            <div id="hist-total-matches" class="text-2xl font-black text-white mt-1">0</div>
+            <span class="text-[11px] text-gray-500">Stored in SQLite History</span>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            <i data-lucide="database" class="w-6 h-6"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Table Container -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-4 border-b border-gray-800 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-400"></i> Historical Match Outcomes & Prediction Verification
+            </h3>
+            <p class="text-xs text-gray-400">Compares predictions against real final match results stored in the database.</p>
+          </div>
+
+          <!-- History Filter -->
+          <div class="flex items-center space-x-2 text-xs">
+            <label class="text-gray-400">Filter Outcome:</label>
+            <select id="hist-filter" onchange="renderHistoryTable()" class="bg-gray-800 border border-gray-700 rounded-xl px-3 py-1.5 text-gray-200">
+              <option value="all">All Finished Matches</option>
+              <option value="won">✅ Won Predictions Only</option>
+              <option value="lost">❌ Lost Predictions Only</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-gray-300">
+            <thead class="bg-gray-850 text-gray-400 uppercase text-[10px] tracking-wider border-b border-gray-800">
+              <tr>
+                <th class="py-3 px-4">Match & League</th>
+                <th class="py-3 px-4 text-center">Final Score</th>
+                <th class="py-3 px-4">1X2 Prediction</th>
+                <th class="py-3 px-4 text-center">1X2 Result</th>
+                <th class="py-3 px-4">Top AI Pick</th>
+                <th class="py-3 px-4 text-center">Top Pick Result</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody" class="divide-y divide-gray-800/60"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal for Full Match Details & 40+ Markets -->
+  <div id="match-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+      
+      <!-- Modal Header -->
+      <div class="p-5 border-b border-gray-800 flex justify-between items-center bg-gray-850">
+        <div>
+          <span id="modal-league" class="text-xs font-semibold text-emerald-400 uppercase tracking-wide">League</span>
+          <h3 id="modal-match-title" class="text-lg font-black text-white mt-0.5">Match Details</h3>
+          <p id="modal-datetime" class="text-xs text-gray-400">Date/Time</p>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        
+        <!-- Primary 1X2 Highlight in Modal -->
+        <div class="bg-gradient-to-r from-gray-850 to-gray-800 border border-amber-500/30 rounded-xl p-4">
+          <span class="text-xs text-amber-400 uppercase font-black flex items-center gap-1.5 mb-2">
+            <i data-lucide="trophy" class="w-4 h-4"></i> Match Winner (1X2) Forecast
+          </span>
+          <div id="modal-1x2-bar" class="grid grid-cols-3 gap-2 text-center text-xs">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Full Markets Grid -->
+        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">All Evaluated Markets (40+)</h4>
+        <div id="modal-markets-grid" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs"></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Client Logic -->
+  <script>
+    let currentDay = 'today';
+    let currentGoldenTab = 'winners_1x2';
+    let selectedLegs = 5;
+    let allGoldenData = {};
+    let allHistoryData = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      fetchStatus();
+      loadGoldenPicks();
+      loadPredictions();
+      initPWA();
+    });
+
+    function initPWA() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then((reg) => {
+          console.log('[PWA] Service Worker registered with scope:', reg.scope);
+        }).catch((err) => {
+          console.log('[PWA] Service Worker registration failed:', err);
+        });
+      }
+
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+          installBtn.classList.remove('hidden');
+          installBtn.onclick = async () => {
+            if (deferredPrompt) {
+              deferredPrompt.prompt();
+              const { outcome } = await deferredPrompt.userChoice;
+              console.log('[PWA] User choice:', outcome);
+              deferredPrompt = null;
+              installBtn.classList.add('hidden');
+            }
+          };
+        }
+      });
+    }
+
+    function showLiveView() {
+      document.getElementById('live-section').classList.remove('hidden');
+      document.getElementById('history-section').classList.add('hidden');
+      document.getElementById('day-switcher').classList.remove('hidden');
+
+      document.getElementById('view-live').className = 'px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition flex items-center gap-1.5';
+      document.getElementById('view-history').className = 'px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition flex items-center gap-1.5';
+    }
+
+    function showHistoryView() {
+      document.getElementById('live-section').classList.add('hidden');
+      document.getElementById('history-section').classList.remove('hidden');
+      document.getElementById('day-switcher').classList.add('hidden');
+
+      document.getElementById('view-history').className = 'px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition flex items-center gap-1.5';
+      document.getElementById('view-live').className = 'px-3.5 py-1.5 rounded-lg text-gray-400 hover:text-white transition flex items-center gap-1.5';
+
+      loadHistory();
+    }
+
+    function setDay(day) {
+      currentDay = day;
+      ['yesterday', 'today', 'tomorrow'].forEach(d => {
+        const btn = document.getElementById(`day-${d}`);
+        if (d === day) {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow transition';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg text-gray-400 hover:text-white transition';
+        }
+      });
+      fetchStatus();
+      loadGoldenPicks();
+      loadPredictions();
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch(`/api/status?day=${currentDay}`);
+        const data = await res.json();
+        const pill = document.getElementById('sync-text');
+        if (data.is_syncing) {
+          pill.innerHTML = `<span class="text-amber-400 animate-pulse">Syncing BetMines...</span>`;
+          document.getElementById('sync-icon').classList.add('animate-spin');
+        } else if (data.count > 0) {
+          const timeStr = data.synced_at ? new Date(data.synced_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Active';
+          pill.innerHTML = `<strong class="text-emerald-400">${data.count}</strong> matches synced (${timeStr})`;
+          document.getElementById('sync-icon').classList.remove('animate-spin');
+        } else {
+          pill.innerHTML = `No data cached. Click Sync!`;
+          document.getElementById('sync-icon').classList.remove('animate-spin');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function triggerSync() {
+      const btn = document.getElementById('sync-btn');
+      const icon = document.getElementById('sync-icon');
+      icon.classList.add('animate-spin');
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/sync?day=${currentDay}`, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message);
+        const poller = setInterval(async () => {
+          const sRes = await fetch(`/api/status?day=${currentDay}`);
+          const sData = await sRes.json();
+          if (!sData.is_syncing) {
+            clearInterval(poller);
+            btn.disabled = false;
+            icon.classList.remove('animate-spin');
+            fetchStatus();
+            loadGoldenPicks();
+            loadPredictions();
+          }
+        }, 4000);
+      } catch (e) {
+        alert("Error initiating sync: " + e);
+        btn.disabled = false;
+        icon.classList.remove('animate-spin');
+      }
+    }
+
+    async function loadGoldenPicks() {
+      try {
+        const res = await fetch(`/api/golden-picks?day=${currentDay}`);
+        allGoldenData = await res.json();
+        renderGolden(currentGoldenTab);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function switchGolden(tab) {
+      currentGoldenTab = tab;
+      ['winners_1x2', 'bankers', 'values', 'btts', 'goals'].forEach(t => {
+        const btn = document.getElementById(`gtab-${t}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = 'px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40 font-semibold';
+          } else {
+            btn.className = 'px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700 font-semibold';
+          }
+        }
+      });
+      renderGolden(tab);
+    }
+
+    function renderGolden(tab) {
+      const container = document.getElementById('golden-container');
+      const items = allGoldenData[tab] || [];
+      if (items.length === 0) {
+        container.innerHTML = `<div class="col-span-4 text-center py-6 text-gray-500 text-xs">No picks found for this category today. Try clicking 'Sync BetMines'!</div>`;
+        return;
+      }
+
+      container.innerHTML = items.slice(0, 4).map(item => `
+        <div class="bg-gray-850 border border-gray-800 rounded-xl p-3.5 hover:border-gray-700 transition flex flex-col justify-between">
+          <div>
+            <div class="text-[10px] text-gray-400 uppercase tracking-wide truncate">${item.league}</div>
+            <div class="text-xs font-bold text-white mt-0.5 truncate">${item.match}</div>
+            <div class="mt-2 text-xs font-black text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-1 rounded-lg inline-block">
+              ${item.pick}
+            </div>
+          </div>
+          <div class="flex items-center justify-between mt-3 pt-2 border-t border-gray-800 text-[11px]">
+            <span class="text-emerald-400 font-bold">Prob: ${item.prob}%</span>
+            <span class="text-amber-400 font-bold font-mono">Odds: ${item.odds ? item.odds.toFixed(2) : '-'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadPredictions() {
+      const market = document.getElementById('market-filter').value;
+      const minProb = document.getElementById('min-prob').value;
+      const minOdds = document.getElementById('min-odds').value;
+      const valueOnly = document.getElementById('value-only').checked;
+      const search = document.getElementById('search-input').value;
+
+      const container = document.getElementById('fixtures-container');
+      container.innerHTML = `
+        <div class="text-center py-12 text-gray-500 text-sm">
+          <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto text-emerald-500 mb-2"></i>
+          Loading BetMines predictions...
+        </div>
+      `;
+      lucide.createIcons();
+
+      try {
+        const query = new URLSearchParams({
+          day: currentDay,
+          market: market,
+          min_prob: minProb,
+          min_odds: minOdds || 0,
+          value_only: valueOnly,
+          search: search || ''
+        });
+
+        const res = await fetch(`/api/predictions?${query}`);
+        const data = await res.json();
+
+        document.getElementById('match-count').innerText = data.total;
+
+        if (data.total === 0) {
+          container.innerHTML = `
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center text-gray-400">
+              <i data-lucide="info" class="w-8 h-8 mx-auto text-amber-400 mb-2"></i>
+              <p class="font-bold">No matches match your filter criteria.</p>
+              <p class="text-xs text-gray-500 mt-1">Try lowering the minimum probability or changing the market.</p>
+            </div>
+          `;
+          lucide.createIcons();
+          return;
+        }
+
+        container.innerHTML = data.matches.map(m => {
+          const pick = m.selected_pick;
+          const p1x2 = m.pred_1x2 || {};
+
+          return `
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 hover:border-gray-700 transition shadow-md flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+              
+              <!-- Match Info -->
+              <div class="flex-1 min-w-[260px]">
+                <div class="flex items-center space-x-2 text-[11px] text-gray-400 mb-1">
+                  <span class="font-semibold text-emerald-400">${m.league}</span>
+                  <span>•</span>
+                  <span>${m.date_time ? new Date(m.date_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}</span>
+                  ${m.status && m.status !== 'NS' ? `<span class="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold">${m.status}</span>` : ''}
+                </div>
+                <div class="text-sm font-black text-white">
+                  ${m.local_team} <span class="text-gray-500 font-normal">vs</span> ${m.visitor_team}
+                </div>
+                ${m.local_score !== null && m.local_score !== undefined ? `
+                  <div class="text-xs font-bold text-amber-400 mt-0.5 font-mono">Score: ${m.local_score} - ${m.visitor_score}</div>
+                ` : ''}
+
+                <!-- Dedicated 1X2 Probabilities & Odds Bar -->
+                <div class="mt-2.5 flex items-center space-x-1.5 text-[11px]">
+                  <span class="text-[10px] text-gray-400 uppercase font-black mr-1">1X2:</span>
+                  <div class="px-2 py-1 rounded-lg border ${p1x2.pick === '1' ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-800/80 border-gray-700 text-gray-300'}">
+                    1: ${p1x2.home_prob}% ${p1x2.home_odds ? '@ ' + p1x2.home_odds.toFixed(2) : ''}
+                  </div>
+                  <div class="px-2 py-1 rounded-lg border ${p1x2.pick === 'X' ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-800/80 border-gray-700 text-gray-300'}">
+                    X: ${p1x2.draw_prob}% ${p1x2.draw_odds ? '@ ' + p1x2.draw_odds.toFixed(2) : ''}
+                  </div>
+                  <div class="px-2 py-1 rounded-lg border ${p1x2.pick === '2' ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-800/80 border-gray-700 text-gray-300'}">
+                    2: ${p1x2.away_prob}% ${p1x2.away_odds ? '@ ' + p1x2.away_odds.toFixed(2) : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Recommendation Badges -->
+              <div class="flex flex-wrap items-center gap-2.5">
+                
+                <!-- 1X2 Winner Badge -->
+                <div class="bg-gray-850 border border-amber-500/30 rounded-xl px-3 py-2 flex items-center gap-2">
+                  <div>
+                    <span class="text-[9px] uppercase font-bold text-amber-400 block">1X2 Winner Pick</span>
+                    <strong class="text-xs font-black text-white">${p1x2.label || '-'}</strong>
+                  </div>
+                  <div class="text-right border-l border-gray-700 pl-2">
+                    <span class="text-xs font-black text-amber-400">${p1x2.prob}%</span>
+                    <span class="text-[10px] text-gray-400 font-mono block">${p1x2.odds ? '@ ' + p1x2.odds.toFixed(2) : ''}</span>
+                  </div>
+                </div>
+
+                <!-- Best Pick Across All Markets -->
+                <div class="bg-gray-850 border border-emerald-500/30 rounded-xl px-3 py-2 flex items-center gap-2">
+                  <div>
+                    <span class="text-[9px] uppercase font-bold text-emerald-400 block">${pick.category || 'AI Pick'}</span>
+                    <strong class="text-xs font-black text-white">${pick.name}</strong>
+                  </div>
+                  <div class="text-right border-l border-gray-700 pl-2">
+                    <span class="text-xs font-black text-emerald-400">${pick.prob}%</span>
+                    <span class="text-[10px] text-gray-400 font-mono block">${pick.odds ? '@ ' + pick.odds.toFixed(2) : ''}</span>
+                  </div>
+                </div>
+
+                <!-- View All 40+ Odds Button -->
+                <button onclick="openModal(${m.id})" class="bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white px-3 py-2.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 border border-gray-700">
+                  <span>All Odds</span>
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+            </div>
+          `;
+        }).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadHistory() {
+      const tbody = document.getElementById('history-tbody');
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">Loading historical match outcomes...</td></tr>`;
+
+      try {
+        const res = await fetch(`/api/history?day=yesterday`);
+        allHistoryData = await res.json();
+
+        document.getElementById('hist-1x2-rate').innerText = allHistoryData.one_x_two_win_rate + '%';
+        document.getElementById('hist-1x2-sub').innerText = `${allHistoryData.one_x_two_won} of ${allHistoryData.one_x_two_evaluated} won`;
+
+        document.getElementById('hist-top-rate').innerText = allHistoryData.top_picks_win_rate + '%';
+        document.getElementById('hist-top-sub').innerText = `${allHistoryData.top_picks_won} of ${allHistoryData.total_finished} won`;
+
+        const profitUnits = allHistoryData.total_profit_units;
+        const profitEl = document.getElementById('hist-profit-units');
+        profitEl.innerText = (profitUnits >= 0 ? '+' : '') + profitUnits.toFixed(2) + ' u';
+        profitEl.className = profitUnits >= 0 ? 'text-2xl font-black text-emerald-400 mt-1' : 'text-2xl font-black text-red-400 mt-1';
+
+        document.getElementById('hist-total-matches').innerText = allHistoryData.total_finished;
+
+        renderHistoryTable();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('history-tbody');
+      if (!allHistoryData || !allHistoryData.history || allHistoryData.history.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-gray-500">No finished matches found in history yet. Switch day to 'Yesterday' and click 'Sync BetMines'!</td></tr>`;
+        return;
+      }
+
+      const filter = document.getElementById('hist-filter').value;
+      const records = allHistoryData.history.filter(r => {
+        if (filter === 'won') return r.top_pick_outcome === 'WON' || r.pred_1x2_outcome === 'WON';
+        if (filter === 'lost') return r.top_pick_outcome === 'LOST' && r.pred_1x2_outcome === 'LOST';
+        return true;
+      });
+
+      tbody.innerHTML = records.map(r => {
+        const p1Won = r.pred_1x2_outcome === 'WON';
+        const topWon = r.top_pick_outcome === 'WON';
+
+        return `
+          <tr class="hover:bg-gray-850/50 transition">
+            <td class="py-3 px-4">
+              <span class="text-[10px] text-gray-500 block uppercase font-bold">${r.league}</span>
+              <strong class="text-white text-xs">${r.match}</strong>
+            </td>
+            <td class="py-3 px-4 text-center font-mono font-bold text-amber-400">
+              ${r.score}
+            </td>
+            <td class="py-3 px-4">
+              <span class="text-white font-semibold">${r.pred_1x2}</span>
+              <span class="text-gray-400 text-[10px] block font-mono">${r.pred_1x2_odds ? '@ ' + r.pred_1x2_odds.toFixed(2) : ''} (${r.pred_1x2_prob}%)</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${p1Won ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                ${r.pred_1x2_outcome}
+              </span>
+            </td>
+            <td class="py-3 px-4">
+              <span class="text-white font-semibold">${r.top_pick}</span>
+              <span class="text-gray-400 text-[10px] block font-mono">${r.top_pick_odds ? '@ ' + r.top_pick_odds.toFixed(2) : ''} (${r.top_pick_prob}%)</span>
+            </td>
+            <td class="py-3 px-4 text-center">
+              <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase ${topWon ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                ${r.top_pick_outcome}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateProbLabel(val) {
+      document.getElementById('prob-val').innerText = val + '%';
+    }
+
+    function applyFilters() {
+      loadPredictions();
+    }
+
+    function resetFilters() {
+      document.getElementById('market-filter').value = 'all';
+      document.getElementById('min-prob').value = 0;
+      updateProbLabel(0);
+      document.getElementById('min-odds').value = '';
+      document.getElementById('value-only').checked = false;
+      document.getElementById('search-input').value = '';
+      loadPredictions();
+    }
+
+    let searchTimer = null;
+    function handleSearch(e) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        loadPredictions();
+      }, 350);
+    }
+
+    function setLegs(legs) {
+      selectedLegs = legs;
+      document.querySelectorAll('.slip-leg-btn').forEach(btn => {
+        if (parseInt(btn.getAttribute('data-leg')) === legs) {
+          btn.className = 'slip-leg-btn py-1.5 rounded-lg bg-emerald-600 text-white font-bold';
+        } else {
+          btn.className = 'slip-leg-btn py-1.5 rounded-lg bg-gray-800 border border-gray-700 hover:bg-emerald-600/30';
+        }
+      });
+    }
+
+    async function generateSlip() {
+      const mode = document.getElementById('slip-mode').value;
+      const resContainer = document.getElementById('slip-result');
+      const itemsContainer = document.getElementById('slip-items');
+
+      try {
+        const res = await fetch('/api/generate-slip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            day: currentDay,
+            legs: selectedLegs,
+            mode: mode,
+            min_prob: 60.0
+          })
+        });
+        const data = await res.json();
+
+        if (data.legs.length === 0) {
+          alert("Not enough matches found matching this slip criteria. Try reducing legs or changing mode.");
+          return;
+        }
+
+        resContainer.classList.remove('hidden');
+        document.getElementById('slip-total-odds').innerText = data.total_odds.toFixed(2);
+        document.getElementById('slip-win-rate').innerText = data.estimated_prob_pct + '%';
+
+        itemsContainer.innerHTML = data.legs.map(l => `
+          <div class="bg-gray-800/80 border border-gray-700 rounded-lg p-2 text-[11px] flex justify-between items-center">
+            <div class="truncate mr-2">
+              <div class="text-white font-semibold truncate">${l.match}</div>
+              <div class="text-amber-400 font-bold">${l.pick}</div>
+            </div>
+            <div class="text-right flex-shrink-0">
+              <span class="text-emerald-400 font-bold">${l.prob}%</span>
+              <span class="text-gray-400 font-mono block">@ ${l.odds.toFixed(2)}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        alert("Slip generation error: " + err);
+      }
+    }
+
+    async function openModal(fixtureId) {
+      try {
+        const res = await fetch(`/api/fixture/${fixtureId}?day=${currentDay}`);
+        const m = await res.json();
+
+        document.getElementById('modal-league').innerText = `${m.country ? m.country + ' - ' : ''}${m.league}`;
+        document.getElementById('modal-match-title').innerText = m.match;
+        document.getElementById('modal-datetime').innerText = m.date_time ? new Date(m.date_time).toLocaleString() : 'Date TBD';
+        
+        const p1 = m.pred_1x2 || {};
+        document.getElementById('modal-1x2-bar').innerHTML = `
+          <div class="p-2.5 rounded-xl border ${p1.pick === '1' ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-800 border-gray-700'}">
+            <span class="text-[10px] text-gray-400 block font-semibold">1 (Home Win)</span>
+            <span class="text-sm font-black">${p1.home_prob}%</span>
+            <span class="text-xs text-gray-400 block font-mono">${p1.home_odds ? '@ ' + p1.home_odds.toFixed(2) : '-'}</span>
+          </div>
+          <div class="p-2.5 rounded-xl border ${p1.pick === 'X' ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-800 border-gray-700'}">
+            <span class="text-[10px] text-gray-400 block font-semibold">X (Draw)</span>
+            <span class="text-sm font-black">${p1.draw_prob}%</span>
+            <span class="text-xs text-gray-400 block font-mono">${p1.draw_odds ? '@ ' + p1.draw_odds.toFixed(2) : '-'}</span>
+          </div>
+          <div class="p-2.5 rounded-xl border ${p1.pick === '2' ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold' : 'bg-gray-800 border-gray-700'}">
+            <span class="text-[10px] text-gray-400 block font-semibold">2 (Away Win)</span>
+            <span class="text-sm font-black">${p1.away_prob}%</span>
+            <span class="text-xs text-gray-400 block font-mono">${p1.away_odds ? '@ ' + p1.away_odds.toFixed(2) : '-'}</span>
+          </div>
+        `;
+
+        const grid = document.getElementById('modal-markets-grid');
+        grid.innerHTML = m.all_markets.map(mkt => `
+          <div class="bg-gray-800 border border-gray-700 rounded-xl p-2.5 flex items-center justify-between">
+            <div class="truncate mr-2">
+              <span class="text-[10px] text-gray-400 block font-semibold uppercase">${mkt.category}</span>
+              <span class="font-bold text-white">${mkt.name}</span>
+            </div>
+            <div class="text-right flex-shrink-0 flex items-center space-x-2">
+              <span class="text-emerald-400 font-bold">${mkt.prob}%</span>
+              <span class="bg-gray-900 border border-gray-700 px-2 py-0.5 rounded text-amber-400 font-mono font-bold">
+                ${mkt.odds ? mkt.odds.toFixed(2) : '-'}
+              </span>
+              ${mkt.is_value ? `<span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-1 py-0.5 rounded font-bold">EV+</span>` : ''}
+            </div>
+          </div>
+        `).join('');
+
+        document.getElementById('match-modal').classList.remove('hidden');
+      } catch (err) {
+        alert("Error loading fixture: " + err);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('match-modal').classList.add('hidden');
+    }
+
+    function exportCSV() {
+      const market = document.getElementById('market-filter').value;
+      const minProb = document.getElementById('min-prob').value;
+      window.location.href = `/api/export?day=${currentDay}&market=${market}&min_prob=${minProb}`;
+    }
+  </script>
+</body>
+</html>
