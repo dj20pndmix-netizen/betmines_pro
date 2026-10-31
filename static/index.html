@@ -100,7 +100,10 @@
 
           <!-- Golden Category Tabs -->
           <div class="flex flex-wrap gap-2 text-xs font-semibold">
-            <button onclick="switchGolden('winners_1x2')" id="gtab-winners_1x2" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40">
+            <button onclick="switchGolden('unbeaten')" id="gtab-unbeaten" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/40">
+              🔥 Unbeaten Streaks (Google Verified)
+            </button>
+            <button onclick="switchGolden('winners_1x2')" id="gtab-winners_1x2" class="px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
               🏆 1X2 Winners
             </button>
             <button onclick="switchGolden('bankers')" id="gtab-bankers" class="px-3.5 py-1.5 rounded-xl bg-gray-800 text-gray-400 hover:text-white border border-gray-700">
@@ -183,6 +186,7 @@
               <label class="block text-gray-400 mb-1">Target Market</label>
               <select id="market-filter" onchange="applyFilters()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-gray-200 font-medium">
                 <option value="all">🌐 All 40+ Markets</option>
+                <option value="unbeaten">🔥 Unbeaten Streaks (Google Verified)</option>
                 <option value="1X2">🏆 Match Winner (1X2 Only)</option>
                 <option value="Double Chance">🛡️ Double Chance (1X, 12, X2)</option>
                 <option value="Goals">⚽ Goals Over/Under (FT)</option>
@@ -380,7 +384,7 @@
   <!-- JavaScript Client Logic -->
   <script>
     let currentDay = 'today';
-    let currentGoldenTab = 'winners_1x2';
+    let currentGoldenTab = 'unbeaten';
     let selectedLegs = 5;
     let allGoldenData = {};
     let allHistoryData = null;
@@ -541,7 +545,7 @@
 
     function switchGolden(tab) {
       currentGoldenTab = tab;
-      ['winners_1x2', 'bankers', 'values', 'btts', 'goals'].forEach(t => {
+      ['unbeaten', 'winners_1x2', 'bankers', 'values', 'btts', 'goals'].forEach(t => {
         const btn = document.getElementById(`gtab-${t}`);
         if (btn) {
           if (t === tab) {
@@ -559,6 +563,36 @@
       const items = allGoldenData[tab] || [];
       if (items.length === 0) {
         container.innerHTML = `<div class="col-span-4 text-center py-6 text-gray-500 text-xs">No picks found for this category today. Try clicking 'Sync BetMines'!</div>`;
+        return;
+      }
+
+      if (tab === 'unbeaten') {
+        container.innerHTML = items.slice(0, 4).map(item => `
+          <div class="bg-gradient-to-b from-gray-850 to-gray-900 border border-amber-500/30 hover:border-amber-500/60 rounded-xl p-3.5 transition flex flex-col justify-between shadow-lg">
+            <div>
+              <div class="flex items-center justify-between text-[10px] text-gray-400 uppercase tracking-wide">
+                <span class="truncate mr-1">${item.league}</span>
+                <a href="${item.google_search_url}" target="_blank" rel="noopener noreferrer" class="text-blue-400 font-bold hover:underline flex items-center gap-0.5 flex-shrink-0">
+                  <i data-lucide="shield-check" class="w-3 h-3 text-blue-400"></i> Google Verified ↗
+                </a>
+              </div>
+              <div class="text-xs font-black text-white mt-1 truncate">${item.match}</div>
+              <div class="mt-2 text-xs font-black text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-1.5 rounded-lg flex items-center justify-between">
+                <span>🔥 ${item.team} (${item.streak_count} Unbeaten)</span>
+                <span class="text-[10px] font-mono text-emerald-400 font-bold">${item.form_display}</span>
+              </div>
+              <div class="mt-2 text-[11px] text-gray-300">
+                <strong>Pick:</strong> <span class="text-emerald-400 font-bold">${item.recommended_pick}</span>
+              </div>
+              ${item.google_snippet ? `<div class="text-[10px] text-gray-400 mt-1 italic truncate">"${item.google_snippet}"</div>` : ''}
+            </div>
+            <div class="flex items-center justify-between mt-3 pt-2 border-t border-gray-800 text-[11px]">
+              <span class="text-emerald-400 font-bold">Unbeaten: ${item.unbeaten_prob}%</span>
+              <span class="text-amber-400 font-bold font-mono">Odds: ${item.odds ? item.odds.toFixed(2) : '-'}</span>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
         return;
       }
 
@@ -642,6 +676,19 @@
                 </div>
                 ${m.local_score !== null && m.local_score !== undefined ? `
                   <div class="text-xs font-bold text-amber-400 mt-0.5 font-mono">Score: ${m.local_score} - ${m.visitor_score}</div>
+                ` : ''}
+
+                ${m.unbeaten_streak ? `
+                  <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <span class="bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-1 rounded-lg text-[11px] font-black flex items-center gap-1.5 shadow-sm">
+                      <i data-lucide="flame" class="w-3.5 h-3.5 text-amber-400"></i>
+                      🔥 ${m.unbeaten_streak.team} (${m.unbeaten_streak.streak_count} Matches Unbeaten: ${m.unbeaten_streak.form_display})
+                    </span>
+                    <a href="${m.unbeaten_streak.google_search_url}" target="_blank" rel="noopener noreferrer" class="bg-blue-600/20 text-blue-300 hover:text-white border border-blue-500/40 px-2 py-0.5 rounded-lg text-[10px] font-bold flex items-center gap-1 transition">
+                      <i data-lucide="shield-check" class="w-3 h-3 text-blue-400"></i>
+                      Google Verified ↗
+                    </a>
+                  </div>
                 ` : ''}
 
                 <!-- Dedicated 1X2 Probabilities & Odds Bar -->

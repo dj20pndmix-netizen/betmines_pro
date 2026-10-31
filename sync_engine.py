@@ -56,6 +56,8 @@ def init_db():
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_fixtures_home_team ON fixtures(home_team)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_fixtures_away_team ON fixtures(away_team)")
     conn.commit()
     conn.close()
 

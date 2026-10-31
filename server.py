@@ -33,6 +33,7 @@ from analyzer import (
     get_golden_picks,
     get_history_performance
 )
+from streaks_engine import identify_unbeaten_streaks
 
 app = FastAPI(
     title="BetMines Pro Sync & Prediction Engine",
@@ -121,12 +122,27 @@ def trigger_sync(background_tasks: BackgroundTasks, day: str = Query("today")):
     background_tasks.add_task(do_background_sync, day)
     return {"success": True, "message": f"Sync with BetMines for '{day}' has been initiated."}
 
+@app.get("/api/unbeaten-streaks")
+def get_unbeaten_streaks_api(day: str = Query("today"), limit: int = Query(30)):
+    fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
+    target_date = get_target_date_str(day)
+    streaks = identify_unbeaten_streaks(fixtures, max_results=limit)
+    return {
+        "total": len(streaks),
+        "target_date": target_date,
+        "display_date": format_display_date(target_date),
+        "streaks": streaks
+    }
+
 @app.get("/api/golden-picks")
 def golden_picks(day: str = Query("today")):
     fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
     if not fixtures:
-        return {"winners_1x2": [], "bankers": [], "values": [], "btts": [], "goals": []}
-    return get_golden_picks(fixtures)
+        return {"winners_1x2": [], "bankers": [], "values": [], "btts": [], "goals": [], "unbeaten": []}
+    picks = get_golden_picks(fixtures)
+    streaks = identify_unbeaten_streaks(fixtures, max_results=12)
+    picks["unbeaten"] = streaks
+    return picks
 
 @app.get("/api/history")
 def history_performance(day: str = Query("yesterday")):
@@ -164,6 +180,57 @@ def list_predictions(
             "matches": []
         }
 
+    # Pre-compute unbeaten streaks map to attach Google-verified badges to matches
+    streaks = identify_unbeaten_streaks(fixtures, max_results=50)
+    streaks_by_fid = {s["fixture_id"]: s for s in streaks}
+
+    if market.lower() == "unbeaten":
+        # Format streaks as ranked predictions
+        matched_results = []
+        for s in streaks:
+            fid = s["fixture_id"]
+            matched_results.append({
+                "id": fid,
+                "match": s["match"],
+                "league": s["league"],
+                "local_team": s["team"] if s["is_home"] else s["opponent"],
+                "visitor_team": s["opponent"] if s["is_home"] else s["team"],
+                "date_time": s["date_time"],
+                "status": s["status"],
+                "local_score": s["local_score"],
+                "visitor_score": s["visitor_score"],
+                "selected_pick": {
+                    "code": s["pick_code"],
+                    "name": s["recommended_pick"],
+                    "category": "Unbeaten Streak",
+                    "prob": s["unbeaten_prob"],
+                    "odds": s["odds"],
+                    "is_value": True,
+                    "ev": round(((s["unbeaten_prob"] / 100.0) * s["odds"]) - 1.0, 3)
+                },
+                "pred_1x2": {
+                    "pick": "1" if s["is_home"] else "2",
+                    "label": f"{s['team']} ({s['streak_type']})",
+                    "prob": s["win_prob"],
+                    "odds": s["odds"],
+                    "home_prob": s["win_prob"] if s["is_home"] else s["opponent_win_prob"],
+                    "draw_prob": s["draw_prob"],
+                    "away_prob": s["opponent_win_prob"] if s["is_home"] else s["win_prob"]
+                },
+                "unbeaten_streak": s
+            })
+
+        if search:
+            s_q = search.lower()
+            matched_results = [r for r in matched_results if s_q in r["match"].lower() or s_q in r["league"].lower()]
+
+        return {
+            "total": len(matched_results),
+            "target_date": target_date,
+            "display_date": format_display_date(target_date),
+            "matches": matched_results
+        }
+
     ranked = get_ranked_predictions(
         fixtures=fixtures,
         market_filter=market,
@@ -172,6 +239,12 @@ def list_predictions(
         value_only=value_only,
         league_filter=league
     )
+
+    # Attach unbeaten streak metadata where applicable
+    for r in ranked:
+        fid = r.get("id")
+        if fid in streaks_by_fid:
+            r["unbeaten_streak"] = streaks_by_fid[fid]
 
     if search:
         s = search.lower()
