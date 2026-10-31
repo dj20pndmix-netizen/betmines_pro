@@ -229,6 +229,32 @@
         <!-- Right Area: Fixture Grid & Search -->
         <div class="lg:col-span-3 space-y-4">
           
+          <!-- Match Status Filter Switcher (Strictly Upcoming vs Finished vs Live) -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-gray-900 border border-gray-800 p-2 rounded-2xl shadow-md">
+            <div class="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+              <button onclick="setMatchStatus('upcoming')" id="tab-status-upcoming" class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow transition flex items-center gap-2">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                <span>Upcoming Matches</span>
+                <span id="badge-upcoming-count" class="bg-emerald-950/80 text-emerald-200 px-2 py-0.5 rounded-full text-[11px] font-black">0</span>
+              </button>
+              <button onclick="setMatchStatus('live')" id="tab-status-live" class="px-3.5 py-2 rounded-xl text-gray-400 hover:text-white transition flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                <span>Live In-Play</span>
+                <span id="badge-live-count" class="bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded-full text-[10px] font-bold">0</span>
+              </button>
+              <button onclick="setMatchStatus('finished')" id="tab-status-finished" class="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition flex items-center gap-2">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-gray-400"></i>
+                <span>Finished Matches</span>
+                <span id="badge-finished-count" class="bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full text-[11px]">0</span>
+              </button>
+            </div>
+            
+            <div id="status-hint" class="text-[11px] text-gray-400 font-medium px-2 flex items-center gap-1.5">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span id="status-hint-text">Strictly showing upcoming matches scheduled for today.</span>
+            </div>
+          </div>
+
           <!-- Search Bar -->
           <div class="bg-gray-900 border border-gray-800 rounded-2xl p-3 px-4 flex flex-wrap items-center justify-between gap-3 shadow-md">
             <div class="flex items-center space-x-2 flex-1 min-w-[200px]">
@@ -446,8 +472,46 @@
       loadHistory();
     }
 
+    let currentMatchStatus = 'upcoming';
+
+    function setMatchStatus(status) {
+      currentMatchStatus = status;
+      updateStatusSwitcherUI();
+      loadPredictions();
+    }
+
+    function updateStatusSwitcherUI() {
+      const statuses = ['upcoming', 'live', 'finished'];
+      statuses.forEach(s => {
+        const btn = document.getElementById(`tab-status-${s}`);
+        if (!btn) return;
+        if (s === currentMatchStatus) {
+          btn.className = 'px-4 py-2 rounded-xl bg-emerald-600 text-white shadow transition flex items-center gap-2 font-bold';
+        } else {
+          btn.className = 'px-4 py-2 rounded-xl text-gray-400 hover:text-white transition flex items-center gap-2 font-semibold';
+        }
+      });
+
+      const hint = document.getElementById('status-hint-text');
+      if (hint) {
+        if (currentMatchStatus === 'upcoming') {
+          hint.innerText = "Strictly showing upcoming matches that haven't played yet.";
+        } else if (currentMatchStatus === 'live') {
+          hint.innerText = "Showing matches currently in-play with live scores.";
+        } else if (currentMatchStatus === 'finished') {
+          hint.innerText = "Showing completed matches with final scores and outcome verifications.";
+        }
+      }
+    }
+
     function setDay(day) {
       currentDay = day;
+      if (day === 'yesterday') {
+        currentMatchStatus = 'finished';
+      } else {
+        currentMatchStatus = 'upcoming';
+      }
+      updateStatusSwitcherUI();
       ['yesterday', 'today', 'tomorrow'].forEach(d => {
         const btn = document.getElementById(`day-${d}`);
         if (d === day) {
@@ -632,6 +696,7 @@
       try {
         const query = new URLSearchParams({
           day: currentDay,
+          status: currentMatchStatus,
           market: market,
           min_prob: minProb,
           min_odds: minOdds || 0,
@@ -644,12 +709,21 @@
 
         document.getElementById('match-count').innerText = data.total;
 
+        if (data.counts) {
+          const upcBadge = document.getElementById('badge-upcoming-count');
+          const livBadge = document.getElementById('badge-live-count');
+          const finBadge = document.getElementById('badge-finished-count');
+          if (upcBadge) upcBadge.innerText = data.counts.upcoming;
+          if (livBadge) livBadge.innerText = data.counts.live;
+          if (finBadge) finBadge.innerText = data.counts.finished;
+        }
+
         if (data.total === 0) {
           container.innerHTML = `
             <div class="bg-gray-900 border border-gray-800 rounded-2xl p-12 text-center text-gray-400">
               <i data-lucide="info" class="w-8 h-8 mx-auto text-amber-400 mb-2"></i>
-              <p class="font-bold">No matches match your filter criteria.</p>
-              <p class="text-xs text-gray-500 mt-1">Try lowering the minimum probability or changing the market.</p>
+              <p class="font-bold">No ${currentMatchStatus} matches found matching your filters.</p>
+              <p class="text-xs text-gray-500 mt-1">Try switching tabs above (Upcoming, Live, Finished) or resetting filters.</p>
             </div>
           `;
           lucide.createIcons();
@@ -659,6 +733,8 @@
         container.innerHTML = data.matches.map(m => {
           const pick = m.selected_pick;
           const p1x2 = m.pred_1x2 || {};
+          const isFinished = ['FT', 'AET', 'PEN', 'Finished', 'AWARDED'].includes(m.status) || (m.local_score !== null && m.local_score !== undefined && m.status !== 'LIVE' && m.status !== 'HT');
+          const isLive = m.status === 'LIVE' || m.status === 'HT' || m.status === '1H' || m.status === '2H';
 
           return `
             <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4 hover:border-gray-700 transition shadow-md flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -669,14 +745,26 @@
                   <span class="font-semibold text-emerald-400">${m.league}</span>
                   <span>•</span>
                   <span>${m.date_time ? new Date(m.date_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'TBD'}</span>
-                  ${m.status && m.status !== 'NS' ? `<span class="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold">${m.status}</span>` : ''}
+                  ${isLive ? `<span class="bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded text-[10px] font-bold animate-pulse">LIVE</span>` : (isFinished ? `<span class="bg-gray-800 text-gray-300 px-1.5 py-0.5 rounded text-[10px] font-bold">FINISHED</span>` : `<span class="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded text-[10px] font-bold">UPCOMING</span>`)}
                 </div>
                 <div class="text-sm font-black text-white">
                   ${m.local_team} <span class="text-gray-500 font-normal">vs</span> ${m.visitor_team}
                 </div>
-                ${m.local_score !== null && m.local_score !== undefined ? `
-                  <div class="text-xs font-bold text-amber-400 mt-0.5 font-mono">Score: ${m.local_score} - ${m.visitor_score}</div>
-                ` : ''}
+                ${isFinished ? `
+                  <div class="mt-1 flex items-center space-x-2 text-xs font-mono font-bold">
+                    <span class="text-amber-300 bg-gray-800 px-2 py-0.5 rounded border border-gray-700">FINAL: ${m.local_score} - ${m.visitor_score} (${m.status})</span>
+                    ${pick.outcome === 'WON' ? '<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2 py-0.5 rounded text-[10px] font-black tracking-wider">WON ✓</span>' : (pick.outcome === 'LOST' ? '<span class="bg-red-500/20 text-red-400 border border-red-500/40 px-2 py-0.5 rounded text-[10px] font-black tracking-wider">LOST ✗</span>' : '')}
+                  </div>
+                ` : (isLive ? `
+                  <div class="mt-1 flex items-center space-x-2 text-xs font-mono font-bold text-red-400">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                    <span>LIVE: ${m.local_score ?? 0} - ${m.visitor_score ?? 0}</span>
+                  </div>
+                ` : `
+                  <div class="text-[11px] text-emerald-400 font-semibold mt-1 flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3 h-3 text-emerald-400"></i> Upcoming Match
+                  </div>
+                `)}
 
                 ${m.unbeaten_streak ? `
                   <div class="mt-2 flex flex-wrap items-center gap-2">

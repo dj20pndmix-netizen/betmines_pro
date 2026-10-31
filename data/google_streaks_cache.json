@@ -298,5 +298,55 @@
     "verified_at_ts": 1793419172.1965225,
     "verification_badge": "Google Verified \u2713",
     "snippet": "x3BRidcgCJCvMcrMRvw6eFk9htRIHuWOnamFvNzAZoMCtmJPgTlQ1QbNIvZXvCgQm"
+  },
+  "hougang united": {
+    "team": "Hougang United",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Hougang%20United%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:21:36.945019+00:00",
+    "verified_at_ts": 1793420496.9450355,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Hougang United."
+  },
+  "rangers": {
+    "team": "Rangers",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Rangers%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:21:38.347698+00:00",
+    "verified_at_ts": 1793420498.3477166,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Rangers."
+  },
+  "usm annaba": {
+    "team": "USM Annaba",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=USM%20Annaba%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:21:55.314100+00:00",
+    "verified_at_ts": 1793420515.3141174,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for USM Annaba."
+  },
+  "hamilton academical": {
+    "team": "Hamilton Academical",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Hamilton%20Academical%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:21:56.959356+00:00",
+    "verified_at_ts": 1793420516.9593828,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Hamilton Academical."
+  },
+  "turan res.": {
+    "team": "Turan Res.",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Turan%20Res.%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:21:58.911025+00:00",
+    "verified_at_ts": 1793420518.9110641,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Turan Res.."
   }
 }

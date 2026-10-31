@@ -85,8 +85,8 @@ def verify_team_with_google(team_name: str) -> Dict[str, Any]:
                 snippet = match.group(1).strip()
                 verification_data["snippet"] = snippet[:140]
 
-    except Exception as e:
-        print(f"[-] Google query notice for {clean_name}: {e}")
+    except Exception:
+        pass
 
     # Save to disk cache
     cache[cache_key] = verification_data
@@ -162,6 +162,12 @@ def identify_unbeaten_streaks(fixtures: List[Dict[str, Any]], max_results: int =
         date_time = f.get("dateTime") or f.get("date")
 
         if not home or not away:
+            continue
+
+        # Strictly exclude finished matches from unbeaten recommendations
+        time_status = f.get("timeStatus", "NS")
+        has_score = f.get("localTeamScore") is not None and f.get("visitorTeamScore") is not None
+        if time_status in {"FT", "AET", "PEN", "Finished", "After Extra Time", "AWARDED"} or (has_score and time_status not in {"LIVE", "HT"}):
             continue
 
         prob_data = f.get("probability", {})

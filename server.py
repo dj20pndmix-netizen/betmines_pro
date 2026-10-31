@@ -162,6 +162,7 @@ def history_performance(day: str = Query("yesterday")):
 @app.get("/api/predictions")
 def list_predictions(
     day: str = Query("today"),
+    status: str = Query("upcoming"),
     market: str = Query("all"),
     min_prob: float = Query(0.0),
     min_odds: float = Query(0.0),
@@ -172,11 +173,31 @@ def list_predictions(
     fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
     target_date = get_target_date_str(day)
 
+    # Compute status counts across all fixtures
+    finished_statuses = {"FT", "AET", "PEN", "Finished", "After Extra Time", "AWARDED"}
+    live_statuses = {"LIVE", "HT", "1H", "2H", "ET", "P"}
+
+    finished_count = sum(
+        1 for f in fixtures 
+        if f.get("timeStatus") in finished_statuses 
+        or (f.get("localTeamScore") is not None and f.get("timeStatus") not in live_statuses)
+    )
+    live_count = sum(1 for f in fixtures if f.get("timeStatus") in live_statuses)
+    upcoming_count = max(len(fixtures) - finished_count - live_count, 0)
+
+    counts = {
+        "upcoming": upcoming_count,
+        "live": live_count,
+        "finished": finished_count,
+        "total": len(fixtures)
+    }
+
     if not fixtures:
         return {
             "total": 0,
             "target_date": target_date,
             "display_date": format_display_date(target_date),
+            "counts": counts,
             "matches": []
         }
 
@@ -228,6 +249,7 @@ def list_predictions(
             "total": len(matched_results),
             "target_date": target_date,
             "display_date": format_display_date(target_date),
+            "counts": counts,
             "matches": matched_results
         }
 
@@ -237,7 +259,8 @@ def list_predictions(
         min_prob=min_prob,
         min_odds=min_odds,
         value_only=value_only,
-        league_filter=league
+        league_filter=league,
+        status_filter=status
     )
 
     # Attach unbeaten streak metadata where applicable
@@ -254,6 +277,7 @@ def list_predictions(
         "total": len(ranked),
         "target_date": target_date,
         "display_date": format_display_date(target_date),
+        "counts": counts,
         "matches": ranked
     }
 

@@ -282,18 +282,42 @@ def analyze_fixture(fix: Dict[str, Any]) -> Dict[str, Any]:
         "all_markets": markets
     }
 
+FINISHED_STATUSES = {"FT", "AET", "PEN", "Finished", "After Extra Time", "AWARDED"}
+LIVE_STATUSES = {"LIVE", "HT", "1H", "2H", "ET", "P"}
+
+def is_finished_match(a: Dict[str, Any]) -> bool:
+    status = a.get("status") or "NS"
+    has_score = a.get("local_score") is not None and a.get("visitor_score") is not None
+    return status in FINISHED_STATUSES or (has_score and status not in LIVE_STATUSES)
+
+def is_live_match(a: Dict[str, Any]) -> bool:
+    status = a.get("status") or "NS"
+    return status in LIVE_STATUSES
+
+def is_upcoming_match(a: Dict[str, Any]) -> bool:
+    return not is_finished_match(a) and not is_live_match(a)
+
 def get_ranked_predictions(
     fixtures: List[Dict[str, Any]],
     market_filter: Optional[str] = None,
     min_prob: float = 0.0,
     min_odds: float = 0.0,
     value_only: bool = False,
-    league_filter: Optional[str] = None
+    league_filter: Optional[str] = None,
+    status_filter: str = "upcoming"
 ) -> List[Dict[str, Any]]:
     analyzed = [analyze_fixture(f) for f in fixtures]
 
     results = []
     for a in analyzed:
+        # Strictly separate upcoming matches from finished matches
+        if status_filter == "upcoming" and not (is_upcoming_match(a) or is_live_match(a)):
+            continue
+        elif status_filter == "finished" and not is_finished_match(a):
+            continue
+        elif status_filter == "live" and not is_live_match(a):
+            continue
+
         if league_filter and league_filter.lower() not in a["league"].lower():
             continue
 
@@ -331,7 +355,7 @@ def get_ranked_predictions(
     return results
 
 def get_golden_picks(fixtures: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
-    """Finds daily Golden Selections including 1X2 Outright Winners."""
+    """Finds daily Golden Selections including 1X2 Outright Winners (strictly upcoming matches)."""
     analyzed = [analyze_fixture(f) for f in fixtures]
 
     winners_1x2 = []
@@ -341,6 +365,10 @@ def get_golden_picks(fixtures: List[Dict[str, Any]]) -> Dict[str, List[Dict[str,
     goal_picks = []
 
     for a in analyzed:
+        # Strictly exclude finished matches from Golden Picks
+        if is_finished_match(a):
+            continue
+
         # Dedicated 1X2 Outright Winner Golden Selections
         pred_1x2 = a["pred_1x2"]
         if pred_1x2["prob"] >= 52.0:
