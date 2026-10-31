@@ -1,4 +1,4 @@
-const CACHE_NAME = 'betmines-pro-v1';
+const CACHE_NAME = 'betmines-pro-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/static/manifest.json',

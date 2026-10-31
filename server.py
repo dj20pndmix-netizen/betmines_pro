@@ -2,13 +2,15 @@
 server.py
 FastAPI Web Server for BetMines Sync & Best Prediction Engine.
 Provides clean REST APIs and serves a real-time responsive Dashboard UI.
+Automated date-aware synchronization ensures today's matches are always shown.
 """
 
 import csv
 import io
 import json
 import threading
-from datetime import datetime
+import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
@@ -21,7 +23,9 @@ from pydantic import BaseModel
 from sync_engine import (
     fetch_betmines_fixtures,
     get_cached_fixtures,
-    get_sync_info
+    get_sync_info,
+    get_target_date_str,
+    is_cache_valid
 )
 from analyzer import (
     analyze_fixture,
@@ -33,7 +37,7 @@ from analyzer import (
 app = FastAPI(
     title="BetMines Pro Sync & Prediction Engine",
     description="100% Real-time synchronization with BetMines & AI Best Prediction Engine",
-    version="1.0.0"
+    version="1.1.0"
 )
 
 app.add_middleware(
@@ -58,38 +62,54 @@ def do_background_sync(target_day: str):
             fetch_betmines_fixtures(target_day)
         except Exception as e:
             LAST_SYNC_ERROR = str(e)
-            print(f"Sync error: {e}")
+            print(f"[-] Background sync error for '{target_day}': {e}")
         finally:
             IS_SYNCING = False
 
 def autonomous_sync_loop():
-    """Independent background worker that syncs BetMines every 60 minutes automatically."""
-    import time
-    time.sleep(10)  # Initial grace period
+    """Independent background worker that keeps BetMines live fixtures and scores automated."""
+    print("[*] Autonomous sync worker started. Checking fixtures immediately...")
     while True:
         try:
-            print("[*] Autonomous sync worker: updating today and yesterday fixtures from BetMines...")
-            do_background_sync("today")
-            time.sleep(5)
-            do_background_sync("yesterday")
-            print("[+] Autonomous sync worker: sync cycle completed successfully.")
+            # Sync today and yesterday to capture new fixtures and updated FT scores
+            if not is_cache_valid("today", max_age_seconds=900):
+                print("[*] Autonomous worker: Syncing today's fixtures...")
+                do_background_sync("today")
+            
+            if not is_cache_valid("yesterday", max_age_seconds=3600):
+                print("[*] Autonomous worker: Syncing yesterday's fixtures...")
+                do_background_sync("yesterday")
+
         except Exception as e:
             print(f"[-] Autonomous sync error: {e}")
-        time.sleep(3600)  # Wait 1 hour between cycles
+
+        # Check every 15 minutes
+        time.sleep(900)
 
 # Launch independent background sync thread on startup
 threading.Thread(target=autonomous_sync_loop, daemon=True).start()
 
+def format_display_date(date_str: str) -> str:
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        return dt.strftime("%A, %d %b %Y")
+    except Exception:
+        return date_str
+
 @app.get("/api/status")
 def get_status(day: str = Query("today")):
     info = get_sync_info(day)
+    target_date = info["target_date"]
     return {
         "status": "Syncing..." if IS_SYNCING else info["status"],
         "is_syncing": IS_SYNCING,
         "synced_at": info["synced_at"],
+        "target_date": target_date,
+        "display_date": format_display_date(target_date),
         "count": info["count"],
+        "is_stale": info.get("is_stale", False),
         "last_error": LAST_SYNC_ERROR,
-        "current_time": datetime.utcnow().isoformat() + "Z"
+        "current_time": datetime.now(timezone.utc).isoformat()
     }
 
 @app.post("/api/sync")
@@ -103,14 +123,14 @@ def trigger_sync(background_tasks: BackgroundTasks, day: str = Query("today")):
 
 @app.get("/api/golden-picks")
 def golden_picks(day: str = Query("today")):
-    fixtures = get_cached_fixtures(day)
+    fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
     if not fixtures:
         return {"winners_1x2": [], "bankers": [], "values": [], "btts": [], "goals": []}
     return get_golden_picks(fixtures)
 
 @app.get("/api/history")
 def history_performance(day: str = Query("yesterday")):
-    fixtures = get_cached_fixtures(day)
+    fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
     if not fixtures:
         # Fallback to query all fixtures from SQLite database
         import sqlite3
@@ -133,9 +153,16 @@ def list_predictions(
     league: Optional[str] = Query(None),
     search: Optional[str] = Query(None)
 ):
-    fixtures = get_cached_fixtures(day)
+    fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
+    target_date = get_target_date_str(day)
+
     if not fixtures:
-        return {"total": 0, "matches": []}
+        return {
+            "total": 0,
+            "target_date": target_date,
+            "display_date": format_display_date(target_date),
+            "matches": []
+        }
 
     ranked = get_ranked_predictions(
         fixtures=fixtures,
@@ -152,12 +179,14 @@ def list_predictions(
 
     return {
         "total": len(ranked),
+        "target_date": target_date,
+        "display_date": format_display_date(target_date),
         "matches": ranked
     }
 
 @app.get("/api/fixture/{fixture_id}")
 def get_fixture_details(fixture_id: int, day: str = Query("today")):
-    fixtures = get_cached_fixtures(day)
+    fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
     for f in fixtures:
         if f.get("id") == fixture_id:
             return analyze_fixture(f)
@@ -171,7 +200,7 @@ class SlipRequest(BaseModel):
 
 @app.post("/api/generate-slip")
 def generate_slip(req: SlipRequest):
-    fixtures = get_cached_fixtures(req.day)
+    fixtures = get_cached_fixtures(req.day, auto_sync_if_stale=True)
     if not fixtures:
         return {"legs": [], "total_odds": 1.0, "estimated_prob": 0.0}
 
@@ -231,7 +260,7 @@ def export_csv(
     market: str = Query("all"),
     min_prob: float = Query(0.0)
 ):
-    fixtures = get_cached_fixtures(day)
+    fixtures = get_cached_fixtures(day, auto_sync_if_stale=True)
     ranked = get_ranked_predictions(fixtures, market_filter=market, min_prob=min_prob)
 
     output = io.StringIO()

@@ -231,7 +231,11 @@
               <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
               <input type="text" id="search-input" onkeyup="handleSearch(event)" placeholder="Search team or league (e.g. Arsenal, Real Madrid, Premier League)..." class="bg-transparent border-none text-xs text-gray-200 focus:outline-none w-full">
             </div>
-            <div class="text-xs text-gray-400 font-medium flex items-center gap-3">
+            <div class="text-xs text-gray-400 font-medium flex items-center gap-2.5">
+              <span id="active-date-badge" class="bg-gray-800 text-amber-400 border border-gray-700 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span id="date-label">Today</span>
+              </span>
               <span>Showing: <strong id="match-count" class="text-emerald-400">0</strong> matches</span>
             </div>
           </div>
@@ -453,26 +457,49 @@
       loadPredictions();
     }
 
-    async function fetchStatus() {
+    let lastKnownSyncedAt = null;
+
+    async function fetchStatus(isAutoPoll = false) {
       try {
         const res = await fetch(`/api/status?day=${currentDay}`);
         const data = await res.json();
         const pill = document.getElementById('sync-text');
+        
+        // Update prominent calendar date badge
+        const dateLabel = document.getElementById('date-label');
+        if (dateLabel && data.display_date) {
+          dateLabel.innerText = data.display_date;
+        }
+
         if (data.is_syncing) {
-          pill.innerHTML = `<span class="text-amber-400 animate-pulse">Syncing BetMines...</span>`;
+          pill.innerHTML = `<span class="text-amber-400 animate-pulse font-semibold">Auto-Syncing BetMines...</span>`;
           document.getElementById('sync-icon').classList.add('animate-spin');
         } else if (data.count > 0) {
           const timeStr = data.synced_at ? new Date(data.synced_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Active';
-          pill.innerHTML = `<strong class="text-emerald-400">${data.count}</strong> matches synced (${timeStr})`;
+          pill.innerHTML = `<span class="text-emerald-400 font-bold">⚡ Automated Live</span> <span class="text-gray-400">(${timeStr})</span>`;
           document.getElementById('sync-icon').classList.remove('animate-spin');
+
+          // If background worker refreshed fixtures while page was open, update UI automatically
+          if (isAutoPoll && lastKnownSyncedAt && data.synced_at !== lastKnownSyncedAt) {
+            console.log("[*] New sync data detected automatically, refreshing view...");
+            loadGoldenPicks();
+            loadPredictions();
+          }
+          lastKnownSyncedAt = data.synced_at;
         } else {
-          pill.innerHTML = `No data cached. Click Sync!`;
+          pill.innerHTML = `No data. Syncing...`;
           document.getElementById('sync-icon').classList.remove('animate-spin');
         }
+        lucide.createIcons();
       } catch (err) {
         console.error(err);
       }
     }
+
+    // Automated live background poller every 30 seconds
+    setInterval(() => {
+      fetchStatus(true);
+    }, 30000);
 
     async function triggerSync() {
       const btn = document.getElementById('sync-btn');
@@ -483,7 +510,6 @@
       try {
         const res = await fetch(`/api/sync?day=${currentDay}`, { method: 'POST' });
         const data = await res.json();
-        alert(data.message);
         const poller = setInterval(async () => {
           const sRes = await fetch(`/api/status?day=${currentDay}`);
           const sData = await sRes.json();
@@ -495,7 +521,7 @@
             loadGoldenPicks();
             loadPredictions();
           }
-        }, 4000);
+        }, 1500);
       } catch (e) {
         alert("Error initiating sync: " + e);
         btn.disabled = false;
