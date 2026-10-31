@@ -526,6 +526,7 @@
     }
 
     let lastKnownSyncedAt = null;
+    let lastKnownTargetDate = null;
 
     async function fetchStatus(isAutoPoll = false) {
       try {
@@ -547,13 +548,14 @@
           pill.innerHTML = `<span class="text-emerald-400 font-bold">⚡ Automated Live</span> <span class="text-gray-400">(${timeStr})</span>`;
           document.getElementById('sync-icon').classList.remove('animate-spin');
 
-          // If background worker refreshed fixtures while page was open, update UI automatically
-          if (isAutoPoll && lastKnownSyncedAt && data.synced_at !== lastKnownSyncedAt) {
-            console.log("[*] New sync data detected automatically, refreshing view...");
+          // If background worker refreshed fixtures or day rolled over to next day, update UI automatically
+          if (isAutoPoll && ((lastKnownSyncedAt && data.synced_at !== lastKnownSyncedAt) || (lastKnownTargetDate && data.target_date !== lastKnownTargetDate))) {
+            console.log("[*] Next day or fresh sync detected automatically, refreshing view...");
             loadGoldenPicks();
             loadPredictions();
           }
           lastKnownSyncedAt = data.synced_at;
+          lastKnownTargetDate = data.target_date;
         } else {
           pill.innerHTML = `No data. Syncing...`;
           document.getElementById('sync-icon').classList.remove('animate-spin');

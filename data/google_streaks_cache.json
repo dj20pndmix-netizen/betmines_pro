@@ -348,5 +348,45 @@
     "verified_at_ts": 1793420518.9110641,
     "verification_badge": "Google Verified \u2713",
     "snippet": "Active unbeaten form and league statistics verified via Google Sports for Turan Res.."
+  },
+  "sportunion mauer": {
+    "team": "Sportunion Mauer",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Sportunion%20Mauer%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:27:38.987486+00:00",
+    "verified_at_ts": 1793420858.9875035,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Sportunion Mauer."
+  },
+  "molde w": {
+    "team": "Molde W",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Molde%20W%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:27:41.645969+00:00",
+    "verified_at_ts": 1793420861.6459935,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Molde W."
+  },
+  "barrow": {
+    "team": "Barrow",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Barrow%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:27:47.921687+00:00",
+    "verified_at_ts": 1793420867.9217,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Barrow."
+  },
+  "academia cantolao": {
+    "team": "Academia Cantolao",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Academia%20Cantolao%20football%20recent%20matches%20form",
+    "verified_at": "2026-10-31T04:27:50.535397+00:00",
+    "verified_at_ts": 1793420870.5354133,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Academia Cantolao."
   }
 }

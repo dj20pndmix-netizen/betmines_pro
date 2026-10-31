@@ -72,11 +72,17 @@ def autonomous_sync_loop():
     print("[*] Autonomous sync worker started. Checking fixtures immediately...")
     while True:
         try:
-            # Sync today and yesterday to capture new fixtures and updated FT scores
+            # 1. Sync today's fixtures and live scores regularly
             if not is_cache_valid("today", max_age_seconds=900):
                 print("[*] Autonomous worker: Syncing today's fixtures...")
                 do_background_sync("today")
+
+            # 2. Pre-fetch tomorrow's fixtures ahead of time
+            if not is_cache_valid("tomorrow", max_age_seconds=3600):
+                print("[*] Autonomous worker: Pre-fetching tomorrow's fixtures...")
+                do_background_sync("tomorrow")
             
+            # 3. Sync yesterday's matches for final scores and verifications
             if not is_cache_valid("yesterday", max_age_seconds=3600):
                 print("[*] Autonomous worker: Syncing yesterday's fixtures...")
                 do_background_sync("yesterday")
