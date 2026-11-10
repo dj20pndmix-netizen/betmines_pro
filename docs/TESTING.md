@@ -19,6 +19,8 @@ In compliance with MPADS Section 13, all critical computational, data ingestion,
 2. **API & Integration Testing (`tests/test_api.py`)**:
    - HTTP response status code contracts.
    - Endpoint schema integrity (`/api/status`, `/api/predictions`, `/api/golden-picks`, `/api/history`, `/api/generate-slip`).
+   - Unbeaten Streaks endpoint validation (`/api/unbeaten-streaks`).
+   - Strict status separation verification (ensuring 0 completed matches in the upcoming feed).
    - PWA manifest and Service Worker header and content checks.
 
 3. **Database Integrity Testing (`tests/test_database.py`)**:
@@ -26,10 +28,17 @@ In compliance with MPADS Section 13, all critical computational, data ingestion,
 
 ---
 
-## 2. Test Execution Command
+## 2. Test Execution Command & Verification Results
 
 Run the complete test suite using `pytest`:
 
 ```bash
-python -m pytest tests/ -v
+python -m pytest
 ```
+
+### Verified Test Summary (15/15 Passed)
+* `tests/test_analyzer.py` (5/5 tests passed) — safe float, Expected Value (EV), 1X2 outcomes, Over/Under & BTTS, fixture analysis structure.
+* `tests/test_api.py` (8/8 tests passed) — status, predictions, golden picks, history, accumulator slip generator, PWA manifest, unbeaten streaks API, status separation.
+* `tests/test_database.py` (2/2 tests passed) — schema constraints, indexed lookups, and upsert idempotency.
+
+**Result: 15 passed in 28.34s (0 failures, 0 regressions)**

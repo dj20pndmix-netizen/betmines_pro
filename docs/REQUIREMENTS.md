@@ -28,6 +28,9 @@
 | **FR-08** | Automatic historical outcome verification (WON/LOST/PENDING) and ROI unit tracking. | **MET** | `analyzer.py`, `server.py` |
 | **FR-09** | Native Progressive Web App (PWA) with manifest, Service Worker, and Android home screen install capability. | **MET** | `static/manifest.json`, `static/sw.js` |
 | **FR-10** | Custom football (soccer ball) vector branding and app iconography. | **MET** | `static/ball.svg`, `static/icon-*.png` |
+| **FR-11** | Google-verified Unbeaten Streaks engine cross-referencing form sequences with Google Search/Sports. | **MET** | `streaks_engine.py`, `static/index.html` |
+| **FR-12** | Strict separation of Upcoming Matches (0 completed matches) from Finished Matches (final score & outcome tracking). | **MET** | `server.py`, `analyzer.py`, `static/index.html` |
+| **FR-13** | Autonomous midnight date rollover and background pre-fetching for upcoming day's fixtures. | **MET** | `server.py`, `sync_engine.py`, `static/index.html` |
 
 ---
 

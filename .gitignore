@@ -6,3 +6,4 @@ __pycache__/
 cloudflared.exe
 *.tmp
 .DS_Store
+tiktok_profile/
