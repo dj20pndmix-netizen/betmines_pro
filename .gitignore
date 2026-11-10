@@ -7,3 +7,4 @@ cloudflared.exe
 *.tmp
 .DS_Store
 tiktok_profile/
+_legacy_tiktok/

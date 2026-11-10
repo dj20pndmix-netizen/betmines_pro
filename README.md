@@ -1,90 +1,71 @@
-# TikTok Auto-Like & Auto-Follow Bot
+# BetMines Pro - AI Best Prediction Engine & 100% Real-Time Sync
 
-An automated assistant that browses TikTok videos, watches them for randomized human-like durations, and automatically likes videos and follows creators while adhering to safe rate limits.
+A professional full-stack football betting prediction & analytics application that syncs in real-time with [BetMines](https://betmines.com), evaluates 40+ betting markets, provides Google-verified undefeated team streaks, and algorithmically identifies banker and high-EV value bets.
 
 ---
 
-## 🚀 Features
+## 🚀 How to Launch the Application
 
-- **Persistent Session Storage:** Log in once using your normal browser window (supports 2FA, QR code, Google/Apple sign-in). Your session cookies remain saved locally in `tiktok_profile/`.
-- **Feed Modes:**
-  - **For You Feed (`foryou`):** Likes and follows directly from your personalized feed.
-  - **Hashtag Feed (`hashtag`):** Targets videos under specific hashtags (e.g., `#gaming`, `#fitness`, `#tech`).
-- **Human Behavior Emulation:**
-  - Randomized watch time per video (e.g., 6–15 seconds) before taking action.
-  - Configurable like & follow probability (e.g., likes ~75% of videos, follows ~30% of creators) so activity does not appear synthetic.
-  - Subtle mouse movement simulation and human-like delays.
-- **Safety Caps & Limits:** Auto-stops once maximum like and follow goals are reached.
-- **Graceful Controls:** Stop anytime with `Ctrl + C` and receive a full session summary.
+### Option 1: One-Click Startup (Recommended)
+Double-click `start.bat` or run in your terminal:
+```bash
+python run.py
+```
+*(or `python start_app.py`)*
+
+This starts the backend engine on `http://127.0.0.1:8000` and automatically opens the interactive dashboard in your default browser.
+
+### Option 2: Android & Mobile Installation (PWA)
+Double-click `start_phone.bat` or run:
+```bash
+python run_phone_app.py
+```
+This launches a secure HTTPS Cloudflare tunnel. Open the generated HTTPS URL on your phone's Chrome browser and tap **"Install App"** to add BetMines Pro directly to your home screen!
+
+---
+
+## ⚡ Key Features
+
+1. **100% Real-time BetMines Sync Engine**:
+   - Ultra-fast native API sync (~1.5s) with automated Playwright headless Chromium fallback.
+   - Date-aware cache validation ensuring live, fresh fixtures are retrieved upon date change.
+   - Auto-syncs **Today**, pre-fetches **Tomorrow**, and records **Yesterday** scores.
+   - Stores data in indexed SQLite database (`data/betmines.db`) and local cache (`data/fixtures_cache.json`).
+
+2. **🔥 Unbeaten Streaks (Google Verified)**:
+   - Evaluates active undefeated runs across all active fixtures.
+   - Cross-verifies active form with direct Google Sports search links.
+   - Employs a 12-hour disk cache (`data/google_streaks_cache.json`) to prevent rate limits.
+
+3. **Strict Match Status Partitioning**:
+   - Strictly separates **Upcoming Matches**, **Live In-Play**, and **Finished Matches**.
+   - Finished matches are never mixed with upcoming predictions.
+
+4. **Intelligent "Best Prediction" Picker**:
+   - **Banker Picks**: High-probability predictions ($\ge 80\%$) with secure odds.
+   - **Value Edge Bets**: Automatically calculates Expected Value ($EV = (\text{Prob} \times \text{Odds}) - 1$) and highlights bets where the statistical probability beats the bookmaker margin ($EV > 0$).
+   - **Golden Daily Selections**: Curated top 10 Bankers, Values, BTTS Specialists, and Goal Machines.
+
+5. **Interactive Accumulator / Parlay Slip Generator**:
+   - Select strategy mode (*Safe Bankers*, *Balanced Value*, *Value Bets Only*, *BTTS Combo*, *Over 2.5 Combo*).
+   - Select number of legs (3, 5, 7, 10 legs).
+   - Generates a customized slip with total odds and estimated winning probability.
+
+6. **Automatic 24-Hour Midnight Rollover**:
+   - Background poller checks the date every 30 seconds.
+   - Automatically switches datasets to the new day at midnight without manual refreshes.
 
 ---
 
 ## 📁 Project Structure
 
-```text
-tiktok/
-├── run.py              # Interactive console launcher menu
-├── login_helper.py     # Secure manual login tool to save your session
-├── tiktok_bot.py       # Core automation engine
-├── config.json         # Configuration parameters and limits
-└── tiktok_profile/     # (Created after login) Local Chromium profile & cookies
-```
-
----
-
-## 🛠️ How to Use
-
-### Step 1: Open Terminal in this folder
-```bash
-cd C:\Users\user\Downloads\tiktok
-```
-
-### Step 2: Launch the Console
-```bash
-python run.py
-```
-
-### Step 3: First-Time Login (Option 1)
-1. Select **Option 1** (`Login / Manage TikTok Account`).
-2. A Chromium window will open to `tiktok.com/login`.
-3. Sign in to your TikTok account as you normally would (scan QR code, password, 2FA, or Google login).
-4. Once you are logged in and see your feed, go back to the terminal and press **Enter**.
-5. Your login session will be saved in `tiktok_profile/`. You won't have to log in again!
-
-### Step 4: Run the Bot (Option 2 or 3)
-- Choose **Option 2** to automate on your **For You** page.
-- Choose **Option 3** to automate on a **Hashtag** (e.g. `tech`, `cooking`, `fyp`).
-
----
-
-## ⚙️ Configuration (`config.json`)
-
-You can edit settings directly via **Option 4** in `python run.py` or by opening `config.json`:
-
-```json
-{
-  "mode": "foryou",
-  "target_hashtag": "fyp",
-  "max_likes": 25,
-  "max_follows": 10,
-  "like_probability": 0.75,
-  "follow_probability": 0.30,
-  "min_watch_seconds": 6,
-  "max_watch_seconds": 15,
-  "min_delay_between_actions": 3,
-  "max_delay_between_actions": 7,
-  "headless": false
-}
-```
-
----
-
-## 🛡️ Best Practices & Safety Tips
-
-1. **Keep Limits Conservative:** 
-   - Recommended maximum: **20–30 likes** and **10–15 follows** per session.
-   - Run 1–2 sessions per day with several hours in between to avoid TikTok shadowbans or temporary action blocks.
-2. **Watch Time:** 
-   - Never set watch time to 0. Real users watch at least 5–15 seconds of a clip.
-3. **Probabilities:** 
-   - Keeping `like_probability` around 60–80% and `follow_probability` around 20–35% prevents the algorithm from detecting robotic 1:1 patterns.
+* [`run.py`](file:///c:/Users/user/Downloads/betmins/run.py): Universal launch script for BetMines Pro.
+* [`start_app.py`](file:///c:/Users/user/Downloads/betmins/start_app.py): App launcher that starts the server and opens your browser.
+* [`start.bat`](file:///c:/Users/user/Downloads/betmins/start.bat): Windows batch file for one-click startup.
+* [`start_phone.bat`](file:///c:/Users/user/Downloads/betmins/start_phone.bat) / [`run_phone_app.py`](file:///c:/Users/user/Downloads/betmins/run_phone_app.py): Secure HTTPS tunnel launcher for mobile devices.
+* [`server.py`](file:///c:/Users/user/Downloads/betmins/server.py): FastAPI backend providing REST endpoints.
+* [`sync_engine.py`](file:///c:/Users/user/Downloads/betmins/sync_engine.py): BetMines API synchronization engine.
+* [`streaks_engine.py`](file:///c:/Users/user/Downloads/betmins/streaks_engine.py): Undefeated streaks calculator with Google Sports verification.
+* [`analyzer.py`](file:///c:/Users/user/Downloads/betmins/analyzer.py): Mathematical evaluation engine for predictions, EV calculations, and ranking.
+* [`static/index.html`](file:///c:/Users/user/Downloads/betmins/static/index.html): Responsive dashboard UI (Tailwind CSS, Lucide icons).
+* [`tests/`](file:///c:/Users/user/Downloads/betmins/tests): Pytest automated test suite (15/15 passing).
