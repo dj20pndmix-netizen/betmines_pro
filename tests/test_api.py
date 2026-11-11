@@ -101,3 +101,23 @@ def test_api_status_separation():
     res_sw = client.get("/sw.js")
     assert res_sw.status_code == 200
     assert "CACHE_NAME" in res_sw.text
+
+def test_api_10m_interval_market():
+    # Test filtering predictions by 10-minute interval market
+    response = client.get("/api/predictions?day=today&market=10min")
+    assert response.status_code == 200
+    data = response.json()
+    assert "matches" in data
+    if data["matches"]:
+        sample = data["matches"][0]
+        assert "pred_10m" in sample
+        assert sample["pred_10m"]["interval"] == "00:01-09:59"
+        assert sample["selected_pick"]["code"] in ["10M_1", "10M_X", "10M_2"]
+        assert sample["selected_pick"]["category"] == "1X2 - Interval 10 Min"
+
+        # Verify fixture detail endpoint includes pred_10m
+        fix_res = client.get(f"/api/fixture/{sample['id']}?day=today")
+        assert fix_res.status_code == 200
+        fix_data = fix_res.json()
+        assert "pred_10m" in fix_data
+        assert fix_data["pred_10m"]["draw_prob"] > 0

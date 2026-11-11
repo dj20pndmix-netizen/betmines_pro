@@ -64,6 +64,15 @@ def evaluate_bet_outcome(market_code: str, home_score: Optional[int], away_score
         return "WON" if btts_actual else "LOST"
     elif market_code == "BTTS_N":
         return "WON" if not btts_actual else "LOST"
+    elif market_code == "10M_X":
+        # 1X2 Interval 10 Minutes: Draw at 09:59
+        if home_score == 0 and away_score == 0:
+            return "WON"
+        return "PENDING"
+    elif market_code in ["10M_1", "10M_2"]:
+        if home_score == 0 and away_score == 0:
+            return "LOST"
+        return "PENDING"
     
     return "PENDING"
 
@@ -231,6 +240,47 @@ def analyze_fixture(fix: Dict[str, Any]) -> Dict[str, Any]:
         ht_ft_2_prob = round((a_prob * prob_dict["away_ht"]) / 100.0 * 1.15, 1)
         add_market("HT2_FT2", f"HT 2 - FT 2 ({visitor_team} leads HT & wins FT)", "HT/FT", min(ht_ft_2_prob, a_prob), None)
 
+    # --- 9. 1X2 - INTERVAL 10 MINUTES (00:01-09:59) ---
+    u05_ht = prob_dict.get("under_0_5_ht")
+    if u05_ht is None and prob_dict.get("over_0_5_ht"):
+        u05_ht = 100.0 - prob_dict["over_0_5_ht"]
+    if u05_ht is None:
+        u05_ht = 60.0
+    u05_ht = max(5.0, min(95.0, float(u05_ht)))
+
+    # Poisson deceleration early interval model (minutes 00:01 - 09:59)
+    p_10m_draw = round((u05_ht / 100.0) ** 0.1667 * 100.0, 1)
+    p_10m_draw = max(72.0, min(95.0, p_10m_draw))
+    p_10m_goal = 100.0 - p_10m_draw
+
+    wh = max(h_prob, 10.0)
+    wa = max(a_prob, 10.0)
+    p_10m_home = round(p_10m_goal * (wh / (wh + wa)), 1)
+    p_10m_away = round(p_10m_goal * (wa / (wh + wa)), 1)
+    p_10m_draw = round(100.0 - p_10m_home - p_10m_away, 1)
+
+    odd_10m_1 = safe_float(odds_dict.get("odd10m_1") or odds_dict.get("odd1X2_10m_1")) or max(3.50, round(1.0 / (p_10m_home / 100.0 * 1.08), 2))
+    odd_10m_x = safe_float(odds_dict.get("odd10m_x") or odds_dict.get("odd1X2_10m_x")) or max(1.10, round(1.0 / (p_10m_draw / 100.0 * 1.05), 2))
+    odd_10m_2 = safe_float(odds_dict.get("odd10m_2") or odds_dict.get("odd1X2_10m_2")) or max(3.50, round(1.0 / (p_10m_away / 100.0 * 1.08), 2))
+
+    add_market("10M_1", f"{local_team} Lead (00:01-09:59)", "1X2 - Interval 10 Min", p_10m_home, odd_10m_1)
+    add_market("10M_X", "Draw (00:01-09:59)", "1X2 - Interval 10 Min", p_10m_draw, odd_10m_x)
+    add_market("10M_2", f"{visitor_team} Lead (00:01-09:59)", "1X2 - Interval 10 Min", p_10m_away, odd_10m_2)
+
+    pred_10m_data = {
+        "interval": "00:01-09:59",
+        "market": "1X2 - Interval 10 Min (00:01-09:59)",
+        "pick": "10M_X" if p_10m_draw >= p_10m_home and p_10m_draw >= p_10m_away else ("10M_1" if p_10m_home > p_10m_away else "10M_2"),
+        "label": "Draw (00:01-09:59)" if p_10m_draw >= p_10m_home and p_10m_draw >= p_10m_away else (f"{local_team} Lead (00:01-09:59)" if p_10m_home > p_10m_away else f"{visitor_team} Lead (00:01-09:59)"),
+        "draw_prob": p_10m_draw,
+        "draw_odds": odd_10m_x,
+        "home_prob": p_10m_home,
+        "home_odds": odd_10m_1,
+        "away_prob": p_10m_away,
+        "away_odds": odd_10m_2,
+        "outcome": evaluate_bet_outcome("10M_X", local_score, visitor_score, status)
+    }
+
     # --- RANK & SELECT BEST PREDICTIONS ---
     bankers = sorted([m for m in markets if m["prob"] >= 78.0 and (m["odds"] is None or m["odds"] >= 1.12)], key=lambda x: x["prob"], reverse=True)
     best_banker = bankers[0] if bankers else None
@@ -276,6 +326,7 @@ def analyze_fixture(fix: Dict[str, Any]) -> Dict[str, Any]:
         "betmines_prob": betmines_primary_prob,
         "betmines_odd": betmines_primary_odd,
         "pred_1x2": pred_1x2_data,
+        "pred_10m": pred_10m_data,
         "top_pick": top_pick,
         "best_banker": best_banker,
         "best_value": best_value,
@@ -329,6 +380,9 @@ def get_ranked_predictions(
                     continue
                 elif m_filter == "double chance" and m["category"] != "Double Chance":
                     continue
+                elif ("10min" in m_filter or "interval" in m_filter or "10-min" in m_filter or "10 min" in m_filter):
+                    if "10 min" not in m["category"].lower() and "10m" not in m["code"].lower():
+                        continue
                 elif m_filter not in m["category"].lower() and m_filter not in m["code"].lower():
                     continue
 

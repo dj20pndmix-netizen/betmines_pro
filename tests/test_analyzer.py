@@ -99,3 +99,48 @@ def test_analyze_fixture_structure():
     assert "winners_1x2" in golden
     assert "bankers" in golden
     assert "values" in golden
+
+def test_10m_interval_market():
+    mock_fixture = {
+        "id": 2002,
+        "localTeam": {"id": 11, "name": "Arsenal"},
+        "visitorTeam": {"id": 22, "name": "Chelsea"},
+        "league": {"id": 2, "name": "Premier League", "country": "England"},
+        "dateTime": "2026-11-11T16:00:00Z",
+        "timeStatus": "FT",
+        "localTeamScore": 0,
+        "visitorTeamScore": 0,
+        "probability": {
+            "home": 55.0,
+            "draw": 25.0,
+            "away": 20.0,
+            "under_0_5_ht": 65.0,
+            "over_0_5_ht": 35.0,
+            "under_2_5": 58.0
+        },
+        "fixtureOdd": {
+            "odd1": 1.80,
+            "oddx": 3.60,
+            "odd2": 4.50
+        }
+    }
+
+    result = analyze_fixture(mock_fixture)
+    assert "pred_10m" in result
+    p10 = result["pred_10m"]
+    assert p10["interval"] == "00:01-09:59"
+    assert p10["draw_prob"] >= 75.0
+    assert round(p10["home_prob"] + p10["draw_prob"] + p10["away_prob"], 1) == 100.0
+    assert p10["outcome"] == "WON"  # 0-0 FT settles 10M_X as WON
+
+    # Check 10M markets are in all_markets
+    market_codes = {m["code"] for m in result["all_markets"]}
+    assert "10M_1" in market_codes
+    assert "10M_X" in market_codes
+    assert "10M_2" in market_codes
+
+    # Check filtering by 10min
+    from analyzer import get_ranked_predictions
+    ranked_10m = get_ranked_predictions([mock_fixture], market_filter="10min", status_filter="finished")
+    assert len(ranked_10m) == 1
+    assert ranked_10m[0]["selected_pick"]["code"] in ["10M_X", "10M_1", "10M_2"]

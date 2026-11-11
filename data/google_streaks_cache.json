@@ -1,52 +1,52 @@
 {
-  "guiseley": {
-    "team": "Guiseley",
+  "bal\u0131kesirspor": {
+    "team": "Bal\u0131kesirspor",
     "google_verified": true,
     "verification_source": "Google Search & Sports",
-    "google_search_url": "https://www.google.com/search?q=Guiseley%20football%20recent%20matches%20form",
-    "verified_at": "2026-11-10T07:12:53.547578+00:00",
-    "verified_at_ts": 1794294773.5475967,
+    "google_search_url": "https://www.google.com/search?q=Bal%C4%B1kesirspor%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T08:31:12.627027+00:00",
+    "verified_at_ts": 1794385872.6270459,
     "verification_badge": "Google Verified \u2713",
-    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Guiseley."
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Bal\u0131kesirspor."
   },
-  "envigado": {
-    "team": "Envigado",
+  "i\u0307stanbul sinopspor": {
+    "team": "\u0130stanbul Sinopspor",
     "google_verified": true,
     "verification_source": "Google Search & Sports",
-    "google_search_url": "https://www.google.com/search?q=Envigado%20football%20recent%20matches%20form",
-    "verified_at": "2026-11-10T07:12:56.304612+00:00",
-    "verified_at_ts": 1794294776.3046298,
+    "google_search_url": "https://www.google.com/search?q=%C4%B0stanbul%20Sinopspor%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T08:31:14.631635+00:00",
+    "verified_at_ts": 1794385874.6316698,
     "verification_badge": "Google Verified \u2713",
-    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Envigado."
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for \u0130stanbul Sinopspor."
   },
-  "talleres c\u00f3rdoba res.": {
-    "team": "Talleres C\u00f3rdoba Res.",
+  "blessing": {
+    "team": "Blessing",
     "google_verified": true,
     "verification_source": "Google Search & Sports",
-    "google_search_url": "https://www.google.com/search?q=Talleres%20C%C3%B3rdoba%20Res.%20football%20recent%20matches%20form",
-    "verified_at": "2026-11-10T07:12:57.587582+00:00",
-    "verified_at_ts": 1794294777.5876136,
+    "google_search_url": "https://www.google.com/search?q=Blessing%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T08:37:36.219985+00:00",
+    "verified_at_ts": 1794386256.2200012,
     "verification_badge": "Google Verified \u2713",
-    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Talleres C\u00f3rdoba Res.."
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Blessing."
   },
-  "gimnasia mendoza res.": {
-    "team": "Gimnasia Mendoza Res.",
+  "barycz su\u0142\u00f3w": {
+    "team": "Barycz Su\u0142\u00f3w",
     "google_verified": true,
     "verification_source": "Google Search & Sports",
-    "google_search_url": "https://www.google.com/search?q=Gimnasia%20Mendoza%20Res.%20football%20recent%20matches%20form",
-    "verified_at": "2026-11-10T07:12:59.541572+00:00",
-    "verified_at_ts": 1794294779.5415978,
+    "google_search_url": "https://www.google.com/search?q=Barycz%20Su%C5%82%C3%B3w%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T08:37:38.605071+00:00",
+    "verified_at_ts": 1794386258.6050951,
     "verification_badge": "Google Verified \u2713",
-    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Gimnasia Mendoza Res.."
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Barycz Su\u0142\u00f3w."
   },
-  "redcar athletic": {
-    "team": "Redcar Athletic",
+  "ye\u015filyurt belediyespor": {
+    "team": "Ye\u015filyurt Belediyespor",
     "google_verified": true,
     "verification_source": "Google Search & Sports",
-    "google_search_url": "https://www.google.com/search?q=Redcar%20Athletic%20football%20recent%20matches%20form",
-    "verified_at": "2026-11-10T07:13:01.218327+00:00",
-    "verified_at_ts": 1794294781.218357,
+    "google_search_url": "https://www.google.com/search?q=Ye%C5%9Filyurt%20Belediyespor%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T08:37:40.563758+00:00",
+    "verified_at_ts": 1794386260.5637782,
     "verification_badge": "Google Verified \u2713",
-    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Redcar Athletic."
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Ye\u015filyurt Belediyespor."
   }
 }
