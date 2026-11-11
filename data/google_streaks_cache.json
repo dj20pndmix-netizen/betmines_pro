@@ -48,5 +48,45 @@
     "verified_at_ts": 1794386260.5637782,
     "verification_badge": "Google Verified \u2713",
     "snippet": "Active unbeaten form and league statistics verified via Google Sports for Ye\u015filyurt Belediyespor."
+  },
+  "vietnam": {
+    "team": "Vietnam",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Vietnam%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T09:07:04.838816+00:00",
+    "verified_at_ts": 1794388024.8388371,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Vietnam."
+  },
+  "ol lyonnes w": {
+    "team": "OL Lyonnes W",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=OL%20Lyonnes%20W%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T09:07:06.537428+00:00",
+    "verified_at_ts": 1794388026.537454,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for OL Lyonnes W."
+  },
+  "bate": {
+    "team": "BATE",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=BATE%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T09:07:30.461616+00:00",
+    "verified_at_ts": 1794388050.4616349,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for BATE."
+  },
+  "avro": {
+    "team": "Avro",
+    "google_verified": true,
+    "verification_source": "Google Search & Sports",
+    "google_search_url": "https://www.google.com/search?q=Avro%20football%20recent%20matches%20form",
+    "verified_at": "2026-11-11T09:07:31.848704+00:00",
+    "verified_at_ts": 1794388051.8487225,
+    "verification_badge": "Google Verified \u2713",
+    "snippet": "Active unbeaten form and league statistics verified via Google Sports for Avro."
   }
 }
