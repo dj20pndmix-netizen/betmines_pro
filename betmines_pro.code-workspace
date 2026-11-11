@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "name": "⚽ BetMines Pro",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "window.title": "⚽ BetMines Pro - AI Best Prediction Engine",
+    "python.defaultInterpreterPath": "python",
+    "python.analysis.extraPaths": ["."]
+  }
+}

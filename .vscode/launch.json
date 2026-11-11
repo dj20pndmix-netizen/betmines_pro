@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run BetMines Pro (start_app.py)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/start_app.py",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "FastAPI Server (uvicorn server:app)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["server:app", "--reload", "--host", "127.0.0.1", "--port", "8000"],
+      "jinja": true
+    }
+  ]
+}

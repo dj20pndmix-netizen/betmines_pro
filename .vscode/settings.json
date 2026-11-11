@@ -1,0 +1,10 @@
+{
+  "window.title": "BetMines Pro - AI Best Prediction Engine",
+  "python.defaultInterpreterPath": "python",
+  "python.analysis.extraPaths": ["."],
+  "files.exclude": {
+    "**/.git": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true
+  }
+}
